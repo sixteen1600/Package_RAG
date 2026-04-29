@@ -1,6 +1,6 @@
 
 
-# 🚀 DocuMind-AI: Enterprise-Grade Financial Report Agent
+# DocuMind-AI: Enterprise-Grade Financial Report Agent
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![LangChain](https://img.shields.io/badge/LangChain-1.2.15-green.svg)
@@ -13,7 +13,7 @@ DocuMind-AI 是一個專為處理**高複雜度商業文檔，如 10-K 財報、
 
 ---
 
-## ✨ 核心架構與亮點 (Core Features)
+## 核心架構與亮點 (Core Features)
 
 本專案針對企業級 AI 應用的三大痛點提出了解決方案：
 
@@ -36,43 +36,38 @@ DocuMind-AI 是一個專為處理**高複雜度商業文檔，如 10-K 財報、
 
 ---
 
-## 📂 專案架構 (Project Structure)
+## 專案架構 (Project Structure)
 
 ```text
-DocuMind-AI-lite/
+Package_RAG/
 │
-├── .env                             # 環境變數配置檔 (存放 OpenAI, Anthropic, Cohere 等 API Keys)
-├── .gitignore                       # Git 忽略清單 (設定忽略 .env, __pycache__, vector_db 等)
-├── requirements.txt                 # 專案依賴套件 (LangChain, LangGraph, Docling, FAISS, BM25 等)
-├── README.md                        # 專案說明文件 (系統架構圖、Agent Workflow、成效評估展示)
-├── main.py                          # 系統進入點 (可用作 CLI 執行，或未來擴展為 FastAPI 介面)
-├── config.py                        # 全域參數設定 (集中管理 Chunk size, 模型名稱如 gpt-4o 等, 檔案路徑)
+├── README.md                         # 專案說明文件
+├── requirements.txt                  # Python 依賴套件
+├── main.py                           # 系統進入點：解析文件、建立索引、啟動 Agent 問答
+├── config.py                         # 全域設定：資料路徑、模型名稱、Chunk 與檢索參數
 │
-├── data/                            # 資料流管理區
-│   ├── raw/                         # 原始未處理的文檔
-│   │   ├── AAPL_2024_10K.pdf        # 蘋果年度財報
-│   │   └── TSM_Sustainability.pdf   # 台積電永續報告書
-│   ├── processed/                   # 經 Docling 處理後的高品質 Markdown 或 JSON 檔案
-│   └── vector_db/                   # 向量與稀疏矩陣資料庫本機儲存區 (如 FAISS index 檔)
+├── data/                             # 資料與索引儲存區
+│   ├── raw/                          # 原始 PDF 文件
+│   │   └── 2024-TSMC-Sustainability-Report-highlights-c.pdf
+│   │
+│   ├── processed/                    # Docling 解析後的輸出結果
+│   │   ├── 2024-TSMC-Sustainability-Report-highlights-c.md
+│   │   └── 2024-TSMC-Sustainability-Report-highlights-c.json
+│   │
+│   └── vector_db/                    # RAG 檢索索引
+│       ├── faiss_index/              # FAISS 向量索引
+│       └── bm25_index.pkl            # BM25 關鍵字索引
 │
-├── src/                             # 系統核心模組
-│   ├── docling_parser.py            # 負責處理複雜版面、表格抽取與 Markdown 格式化
-│   ├── hybrid_retriever.py          # 實作 Dense (Embedding) + Sparse (BM25) 與 Re-ranking 邏輯
-│   ├── langgraph_workflow.py        # 實作具備 Planning, Reflection 審查機制的多節點 Agent
-│   └── tools.py                     # 定義供 Agent 調用的外部工具 (如：特定財報檢索器、計算工具)
-│
-├── experiments/                     # 演算法與策略實驗區
-│   ├── chunking_vs_semantic.py      # 固定長度 vs. 語義分段的對照實驗腳本
-│   └── advanced_rag_exploration.py  # (進階) 探索 Event-centric 或 GraphRAG 等複雜關聯檢索
-│
-└── evaluation/                      # 系統成效評估
-    ├── dataset.json                 # 事先整理好的 20-50 題財報 QA 測試資料集 (Ground Truth)
-    └── metrics_eval.py              # 自動化評估腳本 (計算檢索 Hit Rate、MRR 或 LLM 回答準確率)
+└── src/                              # 系統核心模組
+    ├── docling_parser.py             # 使用 Docling 將 PDF 解析為 Markdown / JSON
+    ├── hybrid_retriever.py           # FAISS + BM25 Hybrid Search 與 Cross-Encoder Re-ranking
+    ├── langgraph_workflow.py         # LangGraph Agent Workflow：Planning / Research / Draft / Reflection
+    └── tools.py                      # 將檢索器封裝成 Agent 可調用的 Tool
 ```
 
 ---
 
-## 🚀 快速開始 (Getting Started)
+## 快速開始 (Getting Started)
 
 ### 1. 安裝環境依賴
 請確保您的 Python 版本 >= 3.10，並執行以下指令安裝所需套件：
@@ -104,12 +99,24 @@ python main.py
 
 ---
 
-## 📊 實驗與評估 (Experiments & Evaluation)
+## 實驗與評估 (Experiments & Evaluation)
 
 本專案內建 `experiments/` 模組，用於驗證不同策略對檢索結果分佈的影響。我們探討了以下統計與優化思維：
 * **Chunking 策略對比**：比較「固定長度切塊 (Fixed-size)」與「語義分段 (Semantic Chunking)」在財報表格檢索上的 Hit Rate。
-* **消融實驗 (Ablation Study)**：量化 `Re-ranking` 節點對於最終 LLM 回答準確率的貢獻度，實證拒絕幻覺的成效。
+
 
 ---
+
+### 可重現性（Reproducibility）
+
+要驗證此專案：
+
+1. 將一個 PDF 檔案放入 `data/raw/`
+2. 執行 `python main.py`
+3. 解析器會在 `data/processed/` 目錄下生成 Markdown 與 JSON 檔案
+4. 索引器會在 `data/vector_db/` 目錄下建立 FAISS 與 BM25 檔案
+5. 代理（agent）會在 `logs/` 目錄下寫入工作流程追蹤紀錄
+6. 將 `logs/retrieved_chunks.json` 與生成的 Markdown 原始內容進行比對
+
 
 > **Note:** 本專案為展示 AI 系統工程、數據解析與 Agentic Workflow 實作能力之概念驗證 (PoC)。
