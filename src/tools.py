@@ -64,7 +64,7 @@ class FinanceTools:
         return financial_document_retriever
     
             
-        # 備註：未來可在此處加入更多工具，ex : 股價 API 查詢等等
+    # 備註：未來可在此處加入更多工具，ex : 股價 API 查詢等等
         
 if __name__ == "__main__":
     tools_factory = FinanceTools()
