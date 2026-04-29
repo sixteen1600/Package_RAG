@@ -1,10 +1,4 @@
-這是一份為你量身打造的 `README.md`。它不僅符合開源社群的高品質專案標準，更將我們前面討論的「火力展示指南」巧妙地轉化為**「架構設計決策 (Architecture Decisions)」**與**「核心亮點 (Core Features)」**。
 
-面試官通常只會花 1 到 2 分鐘掃描 README。這份文件的排版與文案，能確保他們的目光精準落在職缺要求（Parser, Advanced RAG, Agentic Workflow）上，展現你身為頂尖研究生的系統思維。
-
-你可以直接將以下內容複製並貼到你的 `README.md` 檔案中：
-
-***
 
 # 🚀 DocuMind-AI: Enterprise-Grade Financial Report Agent
 
@@ -13,7 +7,7 @@
 ![LangGraph](https://img.shields.io/badge/LangGraph-Enabled-orange.svg)
 ![Docling](https://img.shields.io/badge/Docling-Parser-purple.svg)
 
-DocuMind-AI 是一個專為處理**高複雜度商業文檔（如 10-K 財報、ESG 永續報告書）**所設計的多 Agent 協作檢索問答系統。
+DocuMind-AI 是一個專為處理**高複雜度商業文檔，如 10-K 財報、ESG 永續報告書**所設計的多 Agent 協作檢索問答系統。
 
 本專案突破了傳統 RAG 系統在處理跨頁表格、專業術語與數據對齊時的瓶頸，透過導入進階版面解析、混合檢索（Hybrid Search）以及具備反思機制（Reflection）的 Agentic Workflow，實現低幻覺、高準確率的金融數據分析。
 
@@ -46,19 +40,34 @@ DocuMind-AI 是一個專為處理**高複雜度商業文檔（如 10-K 財報、
 
 ```text
 DocuMind-AI-lite/
-├── main.py                          # 系統 CLI 進入點
-├── config.py                        # 全域參數與模型設定
-├── data/                            
-│   ├── raw/                         # 原始複雜文檔 (PDF)
-│   ├── processed/                   # Docling 解析後的高品質 Markdown/JSON
-│   └── vector_db/                   # 本機 FAISS 與 BM25 索引儲存區
-├── src/                             
-│   ├── docling_parser.py            # 負責版面分析與數據清洗
-│   ├── hybrid_retriever.py          # 實作 Dense + Sparse 與 Cross-Encoder 重排序
-│   ├── langgraph_workflow.py        # LangGraph 多節點 Agent (Planner, Drafter, Reviewer)
-│   └── tools.py                     # Agent 調用的外部工具封裝
-├── experiments/                     # 檢索策略與 Chunking 評估實驗室
-└── evaluation/                      # 系統效能與準確率量化評估腳本
+│
+├── .env                             # 環境變數配置檔 (存放 OpenAI, Anthropic, Cohere 等 API Keys)
+├── .gitignore                       # Git 忽略清單 (設定忽略 .env, __pycache__, vector_db 等)
+├── requirements.txt                 # 專案依賴套件 (LangChain, LangGraph, Docling, FAISS, BM25 等)
+├── README.md                        # 專案說明文件 (系統架構圖、Agent Workflow、成效評估展示)
+├── main.py                          # 系統進入點 (可用作 CLI 執行，或未來擴展為 FastAPI 介面)
+├── config.py                        # 全域參數設定 (集中管理 Chunk size, 模型名稱如 gpt-4o 等, 檔案路徑)
+│
+├── data/                            # 資料流管理區
+│   ├── raw/                         # 原始未處理的文檔
+│   │   ├── AAPL_2024_10K.pdf        # 蘋果年度財報
+│   │   └── TSM_Sustainability.pdf   # 台積電永續報告書
+│   ├── processed/                   # 經 Docling 處理後的高品質 Markdown 或 JSON 檔案
+│   └── vector_db/                   # 向量與稀疏矩陣資料庫本機儲存區 (如 FAISS index 檔)
+│
+├── src/                             # 系統核心模組
+│   ├── docling_parser.py            # 負責處理複雜版面、表格抽取與 Markdown 格式化
+│   ├── hybrid_retriever.py          # 實作 Dense (Embedding) + Sparse (BM25) 與 Re-ranking 邏輯
+│   ├── langgraph_workflow.py        # 實作具備 Planning, Reflection 審查機制的多節點 Agent
+│   └── tools.py                     # 定義供 Agent 調用的外部工具 (如：特定財報檢索器、計算工具)
+│
+├── experiments/                     # 演算法與策略實驗區
+│   ├── chunking_vs_semantic.py      # 固定長度 vs. 語義分段的對照實驗腳本
+│   └── advanced_rag_exploration.py  # (進階) 探索 Event-centric 或 GraphRAG 等複雜關聯檢索
+│
+└── evaluation/                      # 系統成效評估
+    ├── dataset.json                 # 事先整理好的 20-50 題財報 QA 測試資料集 (Ground Truth)
+    └── metrics_eval.py              # 自動化評估腳本 (計算檢索 Hit Rate、MRR 或 LLM 回答準確率)
 ```
 
 ---
@@ -103,4 +112,4 @@ python main.py
 
 ---
 
-> **Note:** 本專案為展示 AI 系統工程、數據解析與 Agentic Workflow 實作能力之概念驗證 (PoC)。歡迎隨時探討更深層的架構優化與圖過濾演算法 (GraphRAG) 的潛在整合。
+> **Note:** 本專案為展示 AI 系統工程、數據解析與 Agentic Workflow 實作能力之概念驗證 (PoC)。

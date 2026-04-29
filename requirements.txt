@@ -6,6 +6,7 @@ langchain-core=0.1.0
 langchain-community=0.3.7
 langchain-openai>=0.0.5
 langgraph>=0.0.26
+langchain-experimental
 
 # 文件解析與處理 (Parsing&Processing)
 docling>=1.0.0
