@@ -3,11 +3,19 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
+# 把 src 目錄加入 Python 的模組搜尋路徑
+# 這樣一來，src 裡面的檔案就能互相直接 import，不用加 'src.' 了！
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__),"src"))
+
 # 匯入自定義模組
 from src.docling_parser import AdvancedDocumentParser
 from src.hybrid_retriever import AdvancedHybridRetriever
 from src.langgraph_workflow import FinancialAgentWorkflow
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+
+from config import RAW_DATA_DIR, PROCESSED_DATA_DIR
 
 
 # 載入環境變數 (.env)
@@ -33,7 +41,7 @@ def initialze_system():
         return False
     
     # 建立必要的資料夾結構
-    for path in ["data/raw", "data/proccessed", "data/vector_db"]:
+    for path in ["data/raw", "data/processed", "data/vector_db"]:
         Path(path).mkdir(parents=True, exist_ok=True)
     
     return True
@@ -43,7 +51,7 @@ def run_pipeline(force_rebuild=False):
     執行完整的數據處理與索引建立流程
     """
     # 1. 文件解析 (Parsing)
-    parser = AdvancedDocumentParser()
+    parser = AdvancedDocumentParser(raw_dir=RAW_DATA_DIR, processed_dir=PROCESSED_DATA_DIR)
     # 檢查是否已有處理過的檔案，避免重複解析耗時
     processed_files = list(Path("data/processed").glob("*.md"))
     
@@ -56,7 +64,7 @@ def run_pipeline(force_rebuild=False):
     # 2. 載入解析後的數據並進行切割 (Chunking)
     logger.info(">>> 正在準備數據進行索引建立...")
     all_docs = []
-    splitter = RecursiveCharacterTextSplitter(chunk_siz=800, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
     
     for md_file in Path("data/processed").glob("*.md"):
         with open(md_file, "r" , encoding="utf-8") as f:
@@ -70,7 +78,7 @@ def run_pipeline(force_rebuild=False):
     
     # 3. 建立混合檢索索引 (Indexing) ??
     retriever_engine = AdvancedHybridRetriever()
-    if not (Path("data/vetor_db/faiss_index").exists()) or force_rebuild:
+    if not (Path("data/vector_db/faiss_index").exists()) or force_rebuild:
         logger.info(">>> 正在建立 Hybrid Search 索引 (FAISS + BM25)...")
         retriever_engine.build_index(all_docs)
     else:
@@ -88,13 +96,13 @@ def start_chat(retriever_engine):
     
     graph = workflow_engine.build_graph()
     
-    print("\n" + "n"*50)
+    print("\n" + "="*50)
     print("財報分析 Agent 已就緒")
     print("輸入 'exit' 或 'quit' 結束對話")
     print("="*50, "\n")
     
     while True:
-        user_input = input("請輸入欲查詢之資訊 : \n>")
+        user_input = input("請輸入欲查詢之資訊 : \n >")
         if user_input.lower() in ['exit', 'quit', 'e', 'q']:
             break
         print("Agent 正在思考與審查中...")
