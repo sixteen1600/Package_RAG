@@ -1,0 +1,69 @@
+{
+  "project": "Package_RAG",
+  "input_pdf": "data/raw/2024-TSMC-Sustainability-Report-highlights-c.pdf",
+  "processed_outputs": [
+    "data/processed/2024-TSMC-Sustainability-Report-highlights-c.md",
+    "data/processed/2024-TSMC-Sustainability-Report-highlights-c.json"
+  ],
+  "question": "根據這份精華版報告，台積電在水資源管理以及廢棄物管理方面，達成了哪些具體的亮點或績效數據？",
+  "workflow": [
+    {
+      "node": "planner",
+      "description": "Generate retrieval steps for the user's question.",
+      "steps": [
+        "閱讀該份精華版報告的相關章節，特別是關於水資源管理和廢棄物管理的部分。",
+        "整理並分析報告中提及的台積電在用水回收率、節水量以及廢棄物回收率等具體績效數據。",
+        "彙整並歸納台積電在水資源管理與廢棄物管理方面的亮點或成就，並確認數據的具體內容與表現。"
+      ]
+    },
+    {
+      "node": "researcher",
+      "description": "Call financial_document_retriever tool for each planner step.",
+      "tool_used": "financial_document_retriever"
+    },
+    {
+      "node": "retriever",
+      "description": "Hybrid retrieval and re-ranking pipeline.",
+      "components": {
+        "dense_retriever": "FAISS",
+        "sparse_retriever": "BM25",
+        "embedding_model": "text-embedding-3-small",
+        "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        "top_k_recall": 15,
+        "top_k_rerank": 5
+      }
+    },
+    {
+      "node": "drafter",
+      "description": "Generate an evidence-based answer from retrieved context."
+    },
+    {
+      "node": "reviewer",
+      "description": "Check whether the draft is grounded in retrieved context.",
+      "reflection": {
+        "revision_count": 1,
+        "status": "accepted_or_max_retry"
+      }
+    }
+  ],
+  "retrieved_evidence_summary": [
+    {
+      "source": "data/processed/2024-TSMC-Sustainability-Report-highlights-c.md",
+      "topic": "Water Management",
+      "evidence": [
+        "首次提出水資源正效益長期目標，預計民國 129 年達成率 100%",
+        "氨氮廢水導電度預估降低約 40%",
+        "化學藥劑使用減量約 30%"
+      ]
+    },
+    {
+      "source": "data/processed/2024-TSMC-Sustainability-Report-highlights-c.md",
+      "topic": "Resource Circulation",
+      "evidence": [
+        "民國 113 年，廢棄物回收率 97%",
+        "民國 113 年已將 9,400 公噸廢棄物純化再生",
+        "創造約新台幣 2,000 萬元的綠色效益"
+      ]
+    }
+  ]
+}
