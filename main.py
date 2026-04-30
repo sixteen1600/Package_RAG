@@ -14,8 +14,8 @@ from src.hybrid_retriever import AdvancedHybridRetriever
 from src.langgraph_workflow import FinancialAgentWorkflow
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
-from config import RAW_DATA_DIR, PROCESSED_DATA_DIR
+# 新增VECTOR_DB_DIR
+from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, VECTOR_DB_DIR
 
 
 # 載入環境變數 (.env)
@@ -77,7 +77,7 @@ def run_pipeline(force_rebuild=False):
             all_docs.extend(chunks)
     
     # 3. 建立混合檢索索引 (Indexing) ??
-    retriever_engine = AdvancedHybridRetriever()
+    retriever_engine = AdvancedHybridRetriever(vector_db_path=str(VECTOR_DB_DIR))
     if not (Path("data/vector_db/faiss_index").exists()) or force_rebuild:
         logger.info(">>> 正在建立 Hybrid Search 索引 (FAISS + BM25)...")
         retriever_engine.build_index(all_docs)
