@@ -54,12 +54,14 @@ class FinancialAgentWorkflow:
         self.llm_generator = ChatOpenAI(model="gpt-4.1-nano", temperature=0.2)
         self.llm_reviewer = ChatOpenAI(model="gpt-4o", temperature=0)
 
-        # 模擬載入檢索工具
-        # self.retriever = AdvancedHybridRetriever()
-        # self.retriever.load_index()
+        # 這裡！Workflow 內部自己去呼叫了 tools.py
         from src.tools import FinanceTools
+        
+        # 把第一棒傳進來的 external_retriever，繼續往下傳給 FinanceTools
         self.tools_factory = FinanceTools(
             external_retriever=external_retriever)
+        
+        # 把包裝好的工具拿回來
         self.retriever_tool = self.tools_factory.get_retriever_tool()
 
         # 綁定工具
