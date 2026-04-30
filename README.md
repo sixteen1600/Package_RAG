@@ -53,16 +53,25 @@ Package_RAG/
 │   ├── processed/                    # Docling 解析後的輸出結果
 │   │   ├── 2024-TSMC-Sustainability-Report-highlights-c.md
 │   │   └── 2024-TSMC-Sustainability-Report-highlights-c.json
+│   │   └── sample_output.md          # 節錄版
 │   │
 │   └── vector_db/                    # RAG 檢索索引
 │       ├── faiss_index/              # FAISS 向量索引
 │       └── bm25_index.pkl            # BM25 關鍵字索引
 │
-└── src/                              # 系統核心模組
-    ├── docling_parser.py             # 使用 Docling 將 PDF 解析為 Markdown / JSON
-    ├── hybrid_retriever.py           # FAISS + BM25 Hybrid Search 與 Cross-Encoder Re-ranking
-    ├── langgraph_workflow.py         # LangGraph Agent Workflow：Planning / Research / Draft / Reflection
-    └── tools.py                      # 將檢索器封裝成 Agent 可調用的 Tool
+├── src/                              # 系統核心模組
+|   ├── docling_parser.py             # 使用 Docling 將 PDF 解析為 Markdown / JSON
+|   ├── hybrid_retriever.py           # FAISS + BM25 Hybrid Search 與 Cross-Encoder Re-ranking
+|   ├── langgraph_workflow.py         # LangGraph Agent Workflow：Planning / Research / Draft / Reflection
+|   └── tools.py                      # 將檢索器封裝成 Agent 可調用的 Tool
+|
+├── demo/                                  # 給人看的展示區
+│   ├── demo_result.md                     # 完整問答流程說明（主角）
+│   └── minimal_repro_test.py              # 最小可重現測試
+│
+└── logs/
+    ├── cmd_output_example.txt             # 原始 CMD log（證據）
+    └── sample_workflow_trace.json         # 結構化流程紀錄
 ```
 
 ---
@@ -99,7 +108,7 @@ python main.py
 
 ---
 
-## 實驗與評估 (Experiments & Evaluation)
+### 5. 實驗與評估 (Experiments & Evaluation)
 
 本專案內建 `experiments/` 模組，用於驗證不同策略對檢索結果分佈的影響。我們探討了以下統計與優化思維：
 * **Chunking 策略對比**：比較「固定長度切塊 (Fixed-size)」與「語義分段 (Semantic Chunking)」在財報表格檢索上的 Hit Rate。
@@ -107,7 +116,7 @@ python main.py
 
 ---
 
-### 可重現性（Reproducibility）
+### 6. 可重現性（Reproducibility）
 
 要驗證此專案：
 
