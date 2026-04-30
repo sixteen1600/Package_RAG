@@ -33,7 +33,7 @@ class AdvancedHybridRetriever:
     3. 透過 Cross-Encoder 進行最終重排序 (Re-ranking)，提昇 Top-K 準確率。
     """
 
-    def __init__(self, vector_db_path: str = "../data/vector_db"):
+    def __init__(self, vector_db_path: str):
         self.vector_db_path = Path(vector_db_path)
         self.embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
         self.vector_db_path.mkdir(parents=True, exist_ok=True)
