@@ -45,33 +45,46 @@ Package_RAG/
 ├── requirements.txt                  # Python 依賴套件
 ├── main.py                           # 系統進入點：解析文件、建立索引、啟動 Agent 問答
 ├── config.py                         # 全域設定：資料路徑、模型名稱、Chunk 與檢索參數
+├── .gitignore                        # Git 忽略規則設定
+├── test1.ipynb                       # 測試用 Notebook（實驗或快速驗證）
 │
 ├── data/                             # 資料與索引儲存區
 │   ├── raw/                          # 原始 PDF 文件
 │   │   └── 2024-TSMC-Sustainability-Report-highlights-c.pdf
 │   │
-│   ├── processed/                    # Docling 解析後的輸出結果
+│   ├── processed/                    # Docling 解析後的輸出結果（Markdown / JSON）
 │   │   ├── 2024-TSMC-Sustainability-Report-highlights-c.md
-│   │   └── 2024-TSMC-Sustainability-Report-highlights-c.json
-│   │   └── sample_output.md          # 節錄版
+│   │   ├── 2024-TSMC-Sustainability-Report-highlights-c.json
+│   │   └── sample_output.md          # 節錄版示例
 │   │
-│   └── vector_db/                    # RAG 檢索索引
-│       ├── faiss_index/              # FAISS 向量索引
-│       └── bm25_index.pkl            # BM25 關鍵字索引
+│   ├── vector_db/                    # 正式使用的 RAG 檢索索引
+│   │   ├── faiss_index/              # FAISS 向量索引
+│   │   │   ├── index.faiss
+│   │   │   └── index.pkl
+│   │   └── bm25_index.pkl            # BM25 關鍵字索引
+│   │
+│   └── vector_db_test/               # 測試用檢索索引
+│       ├── faiss_index/
+│       │   ├── index.faiss
+│       │   └── index.pkl
+│       └── bm25_index.pkl
 │
 ├── src/                              # 系統核心模組
-|   ├── docling_parser.py             # 使用 Docling 將 PDF 解析為 Markdown / JSON
-|   ├── hybrid_retriever.py           # FAISS + BM25 Hybrid Search 與 Cross-Encoder Re-ranking
-|   ├── langgraph_workflow.py         # LangGraph Agent Workflow：Planning / Research / Draft / Reflection
-|   └── tools.py                      # 將檢索器封裝成 Agent 可調用的 Tool
-|
-├── demo/                                  # 給人看的展示區
-│   ├── demo_result.md                     # 完整問答流程說明（主角）
-│   └── minimal_repro_test.py              # 最小可重現測試
+│   ├── docling_parser.py             # 使用 Docling 將 PDF 解析為 Markdown / JSON
+│   ├── hybrid_retriever.py           # FAISS + BM25 Hybrid Search 與 Cross-Encoder Re-ranking
+│   ├── langgraph_workflow.py         # LangGraph Agent Workflow：Planning / Research / Draft / Reflection
+│   └── tools.py                      # 將檢索器封裝成 Agent 可調用的 Tool
 │
-└── logs/
-    ├── cmd_output_example.txt             # 原始 CMD log（證據）
-    └── sample_workflow_trace.json         # 結構化流程紀錄
+├── demo/                             # 給人看的展示區
+│   ├── demo_result.md                # 完整問答流程說明（主展示）
+│   └── minimal_repro_test.py         # 最小可重現測試
+│
+├── experiments/                      
+│   └── chunking_vs_semantic.py       # Chunking vs Semantic 分段策略比較
+│
+└── logs/                             # 執行紀錄與流程追蹤
+    ├── cmd_output_example.txt        # 原始 CMD log（證據）
+    └── sample_workflow_trace.json    # 結構化流程紀錄
 ```
 
 ---
@@ -79,13 +92,13 @@ Package_RAG/
 ## 快速開始 (Getting Started)
 
 ### 1. 安裝環境依賴
-請確保您的 Python 版本 >= 3.10，並執行以下指令安裝所需套件：
+請確保 Python 版本 >= 3.10，並執行以下指令安裝所需套件：
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 2. 環境變數設定
-複製專案中的 `.env.example` 並重新命名為 `.env`，填入您的 API Keys：
+複製專案中的 `.env.example` 並重新命名為 `.env`，填入 API Keys：
 ```env
 OPENAI_API_KEY=your_openai_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here  # 選用，用於進階 Reflection
@@ -111,14 +124,15 @@ python main.py
 ### 5. 實驗與評估 (Experiments & Evaluation)
 
 本專案內建 `experiments/` 模組，用於驗證不同策略對檢索結果分佈的影響。我們探討了以下統計與優化思維：
-* **Chunking 策略對比**：比較「固定長度切塊 (Fixed-size)」與「語義分段 (Semantic Chunking)」在財報表格檢索上的 Hit Rate。
+* **Chunking 策略對比**：比較「固定長度切塊 (Fixed-size)」與「語義分段 (Semantic Chunking)」在財報表格檢索上的 
+Hit Rate。
 
 
 ---
 
 ### 6. 可重現性（Reproducibility）
 
-要驗證此專案：
+驗證此專案的方法：
 
 1. 將一個 PDF 檔案放入 `data/raw/`
 2. 執行 `python main.py`
@@ -128,4 +142,3 @@ python main.py
 6. 將 `logs/retrieved_chunks.json` 與生成的 Markdown 原始內容進行比對
 
 
-> **Note:** 本專案為展示 AI 系統工程、數據解析與 Agentic Workflow 實作能力之概念驗證 (PoC)。
